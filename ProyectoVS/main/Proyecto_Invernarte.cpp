@@ -44,8 +44,8 @@ void processInput(GLFWwindow *window);
 GLFWwindow *window;
 
 // Tamaño de la ventana
-const unsigned int SCR_WIDTH = 1024;
-const unsigned int SCR_HEIGHT = 768;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 900;
 
 // Definición de cámara (posición inicial en XYZ)
 Camera camera(glm::vec3(0.0f, 1.72f, 30.0f));
@@ -59,12 +59,30 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+// --- AÑADIDO: Constantes de Velocidad ---
+const float VELOCIDAD_NORMAL = 5.0f;
+const float VELOCIDAD_SPRINT = 20.0f;
+
 // Shaders
 Shader *staticLightShader; // Renombrado de mLightsShader para más claridad
 Shader *cubemapShader;
 
 // Modelos
-Model *gallery; // Tu modelo de galería estática
+Model *paredes; // Tu modelo de galería estática
+Model *plano;
+Model* letras;
+Model* masetasinv;
+Model* mesassillascafe;
+Model* mueblescafe;
+Model* electrodomesticos;
+Model* adiccafe;
+Model* consumibles;
+Model* mueblessala;
+Model* plantasaxo;
+Model* plantasinv;
+Model* pinturas;
+Model* pinturas2;
+Model* esculturas;
 
 // Cubemap (fondo)
 CubeMap *mainCubeMap;
@@ -160,7 +178,21 @@ bool Start() {
 
 	// Carga del modelo de la galería
 	// Asegúrate que la ruta sea correcta dentro de tu carpeta 'bin'
-	gallery = new Model("models/Galeria.fbx"); // <-- CAMBIA "galeria.fbx" POR EL NOMBRE DE TU ARCHIVO
+	paredes = new Model("models/Paredes.fbx"); // <-- CAMBIA "galeria.fbx" POR EL NOMBRE DE TU ARCHIVO
+	plano = new Model("models/Plano.fbx");
+	letras = new Model("models/Letras.fbx");
+	masetasinv = new Model("models/MasetasInv.fbx");
+	mesassillascafe = new Model("models/MesasSillasCafe.fbx");
+	mueblescafe = new Model("models/MueblesCafe.fbx");
+	electrodomesticos = new Model("models/Electrodomesticos.fbx");
+	adiccafe = new Model("models/AdicCafe.fbx");
+	consumibles = new Model("models/Consumibles.fbx");
+	mueblessala = new Model("models/MueblesSala.fbx");
+	plantasaxo = new Model("models/PlantasAxolot.fbx");
+	plantasinv = new Model("models/PlantasInv.fbx");
+	pinturas = new Model("models/Pinturas.fbx");
+	pinturas2 = new Model("models/Pinturas2.fbx");
+	esculturas = new Model("models/Esculturas.fbx");
 
 	// Carga del Cubemap (fondo)
 	vector<std::string> faces
@@ -193,6 +225,9 @@ bool Start() {
 	material01.diffuse = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
 	material01.specular = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
 	material01.transparency = 1.0f;
+
+	// --- AÑADIDO: Configurar velocidad inicial de la cámara ---
+	camera.MovementSpeed = VELOCIDAD_NORMAL;
 
 	return true;
 }
@@ -231,12 +266,6 @@ bool Update() {
 		staticLightShader->setMat4("projection", projection);
 		staticLightShader->setMat4("view", view);
 
-		// Transformaciones del modelo (Galería)
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
-		staticLightShader->setMat4("model", model);
 		/*
 		// Configuración de luces
 		staticLightShader->setInt("numLights", (int)gLights.size());
@@ -265,7 +294,157 @@ bool Update() {
 		staticLightShader->setVec4("MaterialSpecularColor", material01.specular);
 		staticLightShader->setFloat("transparency", material01.transparency);
 
-		gallery->Draw(*staticLightShader); //¡Dibujamos la galería!
+		// Modelo Paredes
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			paredes->Draw(*staticLightShader); //¡Dibujamos la galería!
+		}
+		//Modelo Plano
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			plano->Draw(*staticLightShader); 
+		}
+		//Modelo Letras
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			letras->Draw(*staticLightShader);
+		}
+		//Modelo MasetasInv
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			masetasinv->Draw(*staticLightShader);
+		}
+		//Modelo MesasSillasCafe
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			mesassillascafe->Draw(*staticLightShader);
+		}
+		//Modelo Muebles Cafe
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			mueblescafe->Draw(*staticLightShader);
+		}
+		//Modelo Electrodomesticos
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			electrodomesticos->Draw(*staticLightShader);
+		}
+		//Modelo Adicionales de la cafe
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			adiccafe->Draw(*staticLightShader);
+		}
+		//Modelo Consumibles Cafe(donas, vasos)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			consumibles->Draw(*staticLightShader);
+		}
+		//Modelo Muebles Sala
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			mueblessala->Draw(*staticLightShader);
+		}
+		//Modelo Plantas Axolotario
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			plantasaxo->Draw(*staticLightShader);
+		}
+		//Modelo Plantas Invernadero
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			plantasinv->Draw(*staticLightShader);
+		}
+		//Modelo Pinturas
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			pinturas->Draw(*staticLightShader);
+		}
+		//Modelo Pinturas2
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			pinturas2->Draw(*staticLightShader);
+		}
+		//Modelo Esculturas
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			esculturas->Draw(*staticLightShader);
+		}
+
 	}
 
 	glUseProgram(0);
@@ -280,10 +459,18 @@ bool Update() {
 // Procesamos entradas del teclado
 void processInput(GLFWwindow* window)
 {
+	
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		camera.MovementSpeed = VELOCIDAD_SPRINT;
+	else
+		camera.MovementSpeed = VELOCIDAD_NORMAL;
+
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
 	// Controles de cámara
+
+
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera.ProcessKeyboard(FORWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
