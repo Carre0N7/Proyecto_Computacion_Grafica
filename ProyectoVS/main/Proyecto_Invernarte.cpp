@@ -66,6 +66,8 @@ const float VELOCIDAD_SPRINT = 20.0f;
 // Shaders
 Shader *staticLightShader; // Renombrado de mLightsShader para más claridad
 Shader *cubemapShader;
+Shader* butterflyShader;
+//Shader* dynamicShader;
 
 // Modelos
 Model *paredes; // Tu modelo de galería estática
@@ -85,6 +87,12 @@ Model* pinturas;
 Model* pinturas2;
 Model* esculturas;
 Model* lampstecho;
+AnimatedModel* butterfly;
+//AnimatedModel colibri;
+
+glm::vec3 colibriCenter = glm::vec3(0.0f, 1.5f, 25.0f); // El centro del círculo
+float colibriRadius = 5.0f;  // Qué tan grande es el círculo
+float colibriSpeed = 1.0f;
 
 // Cubemap (fondo)
 CubeMap *mainCubeMap;
@@ -179,6 +187,10 @@ bool Start() {
 	// Compilación de shaders (¡Necesitaré estos archivos!)
 	staticLightShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
 	cubemapShader = new Shader("shaders/10_vertex_cubemap.vs", "shaders/10_fragment_cubemap.fs");
+	//dynamicShader = new Shader("shaders/10_skinning-IT.vs");
+	butterflyShader = new Shader("shaders/17_mariposa.vs", "shaders/17_mariposa.fs");
+	butterflyShader->setBonesIDs(MAX_RIGGING_BONES); // ¡Importante!
+
 
 	// Carga del modelo de la galería
 	// Asegúrate que la ruta sea correcta dentro de tu carpeta 'bin'
@@ -199,6 +211,9 @@ bool Start() {
 	pinturas2 = new Model("models/Pinturas2.fbx");
 	esculturas = new Model("models/Esculturas.fbx");
 	lampstecho = new Model("models/LampsTecho.fbx");
+	butterfly = new AnimatedModel("models/Mariposa.fbx");
+	//colibri = new AnimatedModel("models/")
+	
 
 	// Carga del Cubemap (fondo)
 	vector<std::string> faces
@@ -327,6 +342,9 @@ bool Update() {
 
 	// Procesar entrada
 	processInput(window);
+
+	// --- AÑADIDO: Actualizar la animación de la mariposa ---
+	butterfly->UpdateAnimation(deltaTime);
 
 	// Limpiar buffers
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -571,6 +589,71 @@ bool Update() {
 
 			lampstecho->Draw(*staticLightShader);
 		}
+		
+		//Modelo Mariposa Animada
+		{
+			// ¡Usamos el nuevo shader!
+			butterflyShader->use();
+			glDisable(GL_BLEND);
+			// --- Enviamos TODOS los uniformes (igual que al staticLightShader) ---
+
+			// Cámara
+			butterflyShader->setMat4("projection", projection);
+			butterflyShader->setMat4("view", view);
+			butterflyShader->setVec3("eye", camera.Position);
+
+			// Luces
+			butterflyShader->setInt("numLights", (int)gLights.size());
+			for (size_t i = 0; i < gLights.size(); ++i) {
+				SetLightUniformVec3(butterflyShader, "Position", i, gLights[i].Position);
+				SetLightUniformVec3(butterflyShader, "Direction", i, gLights[i].Direction);
+				SetLightUniformVec4(butterflyShader, "Color", i, gLights[i].Color);
+				SetLightUniformVec4(butterflyShader, "Power", i, gLights[i].Power);
+				SetLightUniformInt(butterflyShader, "alphaIndex", i, gLights[i].alphaIndex);
+				SetLightUniformFloat(butterflyShader, "distance", i, gLights[i].distance);
+			}
+
+			// Material
+			butterflyShader->setVec4("MaterialAmbientColor", materialPrincipal.ambient);
+			butterflyShader->setVec4("MaterialDiffuseColor", materialPrincipal.diffuse);
+			butterflyShader->setVec4("MaterialSpecularColor", materialPrincipal.specular);
+			butterflyShader->setFloat("transparency", materialPrincipal.transparency);
+
+			// --- ¡NUEVA LÓGICA DE MOVIMIENTO! ---
+
+			// 1. Parámetros del círculo (¡ajusta esto!)
+			float radius = 5.0f;  // Radio del círculo en el que volará
+			float speed = 0.5f;   // Velocidad de la vuelta (valores bajos = lento)
+			glm::vec3 center = glm::vec3(0.0f, 3.0f, -20.0f); // Centro del círculo (X, Y, Z)
+
+			// 2. Calcular posición basada en el tiempo
+			float time = (float)glfwGetTime();
+			float angle = time * speed;
+			float newX = center.x + radius * cos(angle);
+			float newZ = center.z + radius * sin(angle);
+			glm::vec3 newPos = glm::vec3(newX, center.y, newZ); // La altura (Y) se queda fija
+
+			// 3. (Opcional pero recomendado) Calcular orientación
+			// Esto hace que la mariposa "mire" hacia donde vuela.
+			// La tangente es 'yaw = -angle'. El +90° es para alinear el "frente"
+			// del modelo. ¡Quizás tengas que quitar el +90° o poner -90°!
+			float yaw = -angle + glm::radians(0.0f);
+
+			// 4. Construir la matriz de modelo
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, newPos); // 1. Mover a la nueva posición
+			model = glm::rotate(model, yaw, glm::vec3(0.0f, 1.0f, 0.0f)); // 2. Orientar en Y
+			model = glm::scale(model, glm::vec3(0.001f, 0.001f, 0.001f)); // 3. Escalar (al final)
+
+			butterflyShader->setMat4("model", model);
+
+			// --- ¡LA MAGIA DE ANIMACIÓN! ---
+			// Enviamos los datos de los huesos al shader
+			butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, butterfly->gBones);
+
+			// ¡Dibujar!
+			butterfly->Draw(*butterflyShader);
+		}
 
 	}
 
@@ -594,9 +677,7 @@ void processInput(GLFWwindow* window)
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-
-	// Controles de cámara
-
+	
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera.ProcessKeyboard(FORWARD, deltaTime);
