@@ -41,11 +41,13 @@ vec4 ApplyLight(Light light, vec3 N, vec3 L, vec3 E) {
     vec3 R = reflect(-L,N);
     float cosAlpha = clamp( dot( E,R ), 0,1 );
     vec4 K_s = MaterialSpecularColor * light.Color * pow(cosAlpha,light.alphaIndex);
-
-    vec4 l_contribution = K_a  * light.Power / (light.distance * light.distance ) +
-                    K_d * light.Power / (light.distance * light.distance ) +
-                    K_s * light.Power / (light.distance * light.distance );
-
+    
+//    vec4 l_contribution = K_a  * light.Power / (light.distance * light.distance ) +
+//                    K_d * light.Power / (light.distance * light.distance ) +
+//                    K_s * light.Power / (light.distance * light.distance );
+    vec4 attenuation = light.Power / (light.distance * light.distance);
+    vec4 l_contribution = K_a + (K_d * attenuation) + (K_s * attenuation);
+   
     return l_contribution;
 }
 

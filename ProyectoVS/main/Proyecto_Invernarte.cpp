@@ -44,8 +44,8 @@ void processInput(GLFWwindow *window);
 GLFWwindow *window;
 
 // Tamaño de la ventana
-const unsigned int SCR_WIDTH = 1600;
-const unsigned int SCR_HEIGHT = 900;
+const unsigned int SCR_WIDTH = 900;
+const unsigned int SCR_HEIGHT = 600;
 
 // Definición de cámara (posición inicial en XYZ)
 Camera camera(glm::vec3(0.0f, 1.72f, 30.0f));
@@ -69,6 +69,7 @@ Shader *cubemapShader;
 
 // Modelos
 Model *paredes; // Tu modelo de galería estática
+Model* piso;
 Model *plano;
 Model* letras;
 Model* masetasinv;
@@ -83,6 +84,7 @@ Model* plantasinv;
 Model* pinturas;
 Model* pinturas2;
 Model* esculturas;
+Model* lampstecho;
 
 // Cubemap (fondo)
 CubeMap *mainCubeMap;
@@ -91,7 +93,9 @@ CubeMap *mainCubeMap;
 std::vector<Light> gLights;
 
 // Materiales (puedes definir más si tu galería usa varios)
-Material material01;
+Material materialPrincipal;
+Material materialPiso;
+Material materialMueblesSala;
 
 // --- Funciones de ayuda para luces (Copiadas de tu práctica) ---
 void SetLightUniformInt(Shader *shader, const char* propertyName, size_t lightIndex, int value) {
@@ -179,6 +183,7 @@ bool Start() {
 	// Carga del modelo de la galería
 	// Asegúrate que la ruta sea correcta dentro de tu carpeta 'bin'
 	paredes = new Model("models/Paredes.fbx"); // <-- CAMBIA "galeria.fbx" POR EL NOMBRE DE TU ARCHIVO
+	piso = new Model("models/Piso.fbx");
 	plano = new Model("models/Plano.fbx");
 	letras = new Model("models/Letras.fbx");
 	masetasinv = new Model("models/MasetasInv.fbx");
@@ -193,6 +198,7 @@ bool Start() {
 	pinturas = new Model("models/Pinturas.fbx");
 	pinturas2 = new Model("models/Pinturas2.fbx");
 	esculturas = new Model("models/Esculturas.fbx");
+	lampstecho = new Model("models/LampsTecho.fbx");
 
 	// Carga del Cubemap (fondo)
 	vector<std::string> faces
@@ -209,7 +215,7 @@ bool Start() {
 	mainCubeMap->loadCubemap(faces);
 
 	// Configuración de luces (puedes ajustar esto como necesites)
-	
+	/*
 	Light light01;
 	light01.Position = glm::vec3(5.0f, 2.0f, 5.0f);
 	light01.Color = glm::vec4(0.3f, 0.3f, 0.3f, 1.0f);
@@ -219,15 +225,95 @@ bool Start() {
 	light02.Position = glm::vec3(-5.0f, 2.0f, 5.0f);
 	light02.Color = glm::vec4(0.3f, 0.3f, 0.3f, 1.0f);
 	gLights.push_back(light02);
-	
-	// Configuración de material (puedes ignorar esto si tu modelo .fbx ya trae materiales)
-	material01.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
-	material01.diffuse = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-	material01.specular = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
-	material01.transparency = 1.0f;
+	*/
+
+	Light light_sol;
+	light_sol.Position = glm::vec3(0.0f, 50.0f, 0.0f);   // Posición MUY ALTA, en el cielo
+	light_sol.Direction = glm::vec3(0.0f, -1.0f, 0.0f);  // Apuntando directo hacia abajo
+	light_sol.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // Un color cálido, ligeramente amarillo
+	light_sol.Power = glm::vec4(1.2f, 1.2f, 1.2f, 1.0f); // Un poco más de potencia que los focos
+	light_sol.alphaIndex = 32;                           // Brillo especular
+	light_sol.distance = 1.0f;                           // Mantenemos la misma atenuación
+	gLights.push_back(light_sol);
+
+	//_______LUCES SALA
+	// Configuración de luces (puedes ajustar esto como necesites)
+	Light light01;				//(X, Y, Z)
+	light01.Position = glm::vec3(5.0f, 4.4f, 5.0f);   // Posición
+	light01.Direction = glm::vec3(0.0f, -1.0f, 0.0f); // Dirección (apuntando hacia abajo)
+	light01.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f); // Color (más brillante)
+	light01.Power = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f); // Potencia
+	light01.alphaIndex = 32;                          // Índice especular
+	light01.distance = 2.0f;                         // <-- ARREGLADO
+	gLights.push_back(light01);
+
+	Light light02;
+	light02.Position = glm::vec3(-5.0f, 4.4f, 5.0f);
+	light02.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
+	light02.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	light02.Power = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	light02.alphaIndex = 32;
+	light02.distance = 2.0f;                       
+	gLights.push_back(light02);
+
+	Light light03;
+	light03.Position = glm::vec3(5.0f, 4.4f, 15.0f);
+	light03.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
+	light03.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	light03.Power = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	light03.alphaIndex = 32;
+	light03.distance = 2.0f;
+	gLights.push_back(light03);
+
+	Light light04;
+	light04.Position = glm::vec3(-5.0f, 4.4f, 15.0f);
+	light04.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
+	light04.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	light04.Power = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	light04.alphaIndex = 32;
+	light04.distance = 2.0f;
+	gLights.push_back(light04);
+
+	//_________Luces CAfe
+
+	Light light05;
+	light05.Position = glm::vec3(-18.0f, 4.4f, -5.0f);
+	light05.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
+	light05.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	light05.Power = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	light05.alphaIndex = 32;
+	light05.distance = 2.0f;
+	gLights.push_back(light05);
+
+	Light light06;
+	light06.Position = glm::vec3(-18.0f, 4.4f, -10.0f);
+	light06.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
+	light06.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	light06.Power = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	light06.alphaIndex = 32;
+	light06.distance = 2.0f;
+	gLights.push_back(light06);
+
+	//---MATERIAL Principal
+	materialPrincipal.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+	materialPrincipal.diffuse = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	materialPrincipal.specular = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+	materialPrincipal.transparency = 1.0f;
+
+	//---MATERIAL Piso
+	materialPiso.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+	materialPiso.diffuse = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f); // Usa el color claro de tu madera
+	materialPiso.specular = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // ¡CERO BRILLO!
+	materialPiso.transparency = 1.0f;
 
 	// --- AÑADIDO: Configurar velocidad inicial de la cámara ---
 	camera.MovementSpeed = VELOCIDAD_NORMAL;
+
+	//---MATERIAL Muebles de la sala
+	materialMueblesSala.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+	materialMueblesSala.diffuse = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f); // Un gris medio para la tela
+	materialMueblesSala.specular = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // ¡CERO BRILLO!
+	materialMueblesSala.transparency = 1.0f;
 
 	return true;
 }
@@ -289,10 +375,10 @@ bool Update() {
 		staticLightShader->setVec3("eye", camera.Position);
 
 		// Aplicamos propiedades materiales (Opcional, si el modelo no las tiene)
-		staticLightShader->setVec4("MaterialAmbientColor", material01.ambient);
-		staticLightShader->setVec4("MaterialDiffuseColor", material01.diffuse);
-		staticLightShader->setVec4("MaterialSpecularColor", material01.specular);
-		staticLightShader->setFloat("transparency", material01.transparency);
+		staticLightShader->setVec4("MaterialAmbientColor", materialPrincipal.ambient);
+		staticLightShader->setVec4("MaterialDiffuseColor", materialPrincipal.diffuse);
+		staticLightShader->setVec4("MaterialSpecularColor", materialPrincipal.specular);
+		staticLightShader->setFloat("transparency", materialPrincipal.transparency);
 
 		// Modelo Paredes
 		{
@@ -304,6 +390,27 @@ bool Update() {
 
 			paredes->Draw(*staticLightShader); //¡Dibujamos la galería!
 		}
+		// Modelo Piso
+		{
+			staticLightShader->setVec4("MaterialAmbientColor", materialPiso.ambient);
+			staticLightShader->setVec4("MaterialDiffuseColor", materialPiso.diffuse);
+			staticLightShader->setVec4("MaterialSpecularColor", materialPiso.specular);
+			staticLightShader->setFloat("transparency", materialPiso.transparency);
+
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			piso->Draw(*staticLightShader); //¡Dibujamos la galería!
+		}
+
+		staticLightShader->setVec4("MaterialAmbientColor", materialPrincipal.ambient);
+		staticLightShader->setVec4("MaterialDiffuseColor", materialPrincipal.diffuse);
+		staticLightShader->setVec4("MaterialSpecularColor", materialPrincipal.specular);
+		staticLightShader->setFloat("transparency", materialPrincipal.transparency);
+
 		//Modelo Plano
 		{
 			glm::mat4 model = glm::mat4(1.0f);
@@ -386,6 +493,11 @@ bool Update() {
 		}
 		//Modelo Muebles Sala
 		{
+			staticLightShader->setVec4("MaterialAmbientColor", materialMueblesSala.ambient);
+			staticLightShader->setVec4("MaterialDiffuseColor", materialMueblesSala.diffuse);
+			staticLightShader->setVec4("MaterialSpecularColor", materialMueblesSala.specular);
+			staticLightShader->setFloat("transparency", materialMueblesSala.transparency);
+			
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
@@ -396,6 +508,11 @@ bool Update() {
 		}
 		//Modelo Plantas Axolotario
 		{
+			staticLightShader->setVec4("MaterialAmbientColor", materialPrincipal.ambient);
+			staticLightShader->setVec4("MaterialDiffuseColor", materialPrincipal.diffuse);
+			staticLightShader->setVec4("MaterialSpecularColor", materialPrincipal.specular);
+			staticLightShader->setFloat("transparency", materialPrincipal.transparency);
+
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
@@ -443,6 +560,16 @@ bool Update() {
 			staticLightShader->setMat4("model", model);
 
 			esculturas->Draw(*staticLightShader);
+		}
+		//Modelo Lamps Techo
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			lampstecho->Draw(*staticLightShader);
 		}
 
 	}
