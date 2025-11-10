@@ -87,12 +87,12 @@ Model* pinturas;
 Model* pinturas2;
 Model* esculturas;
 Model* lampstecho;
+Model* terrario;
 AnimatedModel* butterfly;
-//AnimatedModel colibri;
-
-glm::vec3 colibriCenter = glm::vec3(0.0f, 1.5f, 25.0f); // El centro del círculo
-float colibriRadius = 5.0f;  // Qué tan grande es el círculo
-float colibriSpeed = 1.0f;
+AnimatedModel* colibri;
+AnimatedModel* conejo;
+//AnimatedModel* iguana;
+AnimatedModel* serpiente;
 
 // Cubemap (fondo)
 CubeMap *mainCubeMap;
@@ -210,10 +210,13 @@ bool Start() {
 	pinturas = new Model("models/Pinturas.fbx");
 	pinturas2 = new Model("models/Pinturas2.fbx");
 	esculturas = new Model("models/Esculturas.fbx");
-	lampstecho = new Model("models/LampsTecho.fbx");
+	lampstecho = new Model("models/LampsTecho.fbx"); 
+	terrario = new Model("models/Terrario.fbx");
 	butterfly = new AnimatedModel("models/Mariposa.fbx");
-	//colibri = new AnimatedModel("models/")
-	
+	colibri = new AnimatedModel("models/Colibri.fbx");
+	conejo = new AnimatedModel("models/Conejo.fbx");
+	//iguana = new AnimatedModel("models/Iguana.fbx");
+	serpiente = new AnimatedModel("models/Serpiente.fbx");
 
 	// Carga del Cubemap (fondo)
 	vector<std::string> faces
@@ -345,6 +348,10 @@ bool Update() {
 
 	// --- AÑADIDO: Actualizar la animación de la mariposa ---
 	butterfly->UpdateAnimation(deltaTime);
+	colibri->UpdateAnimation(deltaTime);
+	conejo->UpdateAnimation(deltaTime); 
+	//iguana->UpdateAnimation(deltaTime);
+	serpiente->UpdateAnimation(deltaTime);
 
 	// Limpiar buffers
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -589,14 +596,25 @@ bool Update() {
 
 			lampstecho->Draw(*staticLightShader);
 		}
-		
-		//Modelo Mariposa Animada
+		//Modelo Terrario
 		{
-			// ¡Usamos el nuevo shader!
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			staticLightShader->setMat4("model", model);
+
+			terrario->Draw(*staticLightShader);
+		}
+
+		
+		//Modelo Mariposa Animada (Y COLIBRÍ)
+		{
+			// ¡Usamos el shader de animación!
 			butterflyShader->use();
 			glDisable(GL_BLEND);
-			// --- Enviamos TODOS los uniformes (igual que al staticLightShader) ---
 
+			// --- ENVIAMOS UNIFORMES COMUNES (para ambos modelos) ---
 			// Cámara
 			butterflyShader->setMat4("projection", projection);
 			butterflyShader->setMat4("view", view);
@@ -613,46 +631,108 @@ bool Update() {
 				SetLightUniformFloat(butterflyShader, "distance", i, gLights[i].distance);
 			}
 
-			// Material
+			// Material (usamos el principal para ambos)
 			butterflyShader->setVec4("MaterialAmbientColor", materialPrincipal.ambient);
 			butterflyShader->setVec4("MaterialDiffuseColor", materialPrincipal.diffuse);
 			butterflyShader->setVec4("MaterialSpecularColor", materialPrincipal.specular);
 			butterflyShader->setFloat("transparency", materialPrincipal.transparency);
 
-			// --- ¡NUEVA LÓGICA DE MOVIMIENTO! ---
 
-			// 1. Parámetros del círculo (¡ajusta esto!)
-			float radius = 5.0f;  // Radio del círculo en el que volará
-			float speed = 0.5f;   // Velocidad de la vuelta (valores bajos = lento)
-			glm::vec3 center = glm::vec3(0.0f, 3.0f, -20.0f); // Centro del círculo (X, Y, Z)
+			// --- DIBUJAR MARIPOSA (Con su movimiento) ---
+			{
+				// 1. Parámetros del círculo
+				float radius = 5.0f;
+				float speed = 0.5f;
+				glm::vec3 center = glm::vec3(0.0f, 3.0f, -20.0f);
 
-			// 2. Calcular posición basada en el tiempo
-			float time = (float)glfwGetTime();
-			float angle = time * speed;
-			float newX = center.x + radius * cos(angle);
-			float newZ = center.z + radius * sin(angle);
-			glm::vec3 newPos = glm::vec3(newX, center.y, newZ); // La altura (Y) se queda fija
+				// 2. Calcular posición basada en el tiempo
+				float time = (float)glfwGetTime();
+				float angle = time * speed;
+				float newX = center.x + radius * cos(angle);
+				float newZ = center.z + radius * sin(angle);
+				glm::vec3 newPos = glm::vec3(newX, center.y, newZ);
 
-			// 3. (Opcional pero recomendado) Calcular orientación
-			// Esto hace que la mariposa "mire" hacia donde vuela.
-			// La tangente es 'yaw = -angle'. El +90° es para alinear el "frente"
-			// del modelo. ¡Quizás tengas que quitar el +90° o poner -90°!
-			float yaw = -angle + glm::radians(0.0f);
+				// 3. Calcular orientación
+				float yaw = -angle + glm::radians(0.0f);
 
-			// 4. Construir la matriz de modelo
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, newPos); // 1. Mover a la nueva posición
-			model = glm::rotate(model, yaw, glm::vec3(0.0f, 1.0f, 0.0f)); // 2. Orientar en Y
-			model = glm::scale(model, glm::vec3(0.001f, 0.001f, 0.001f)); // 3. Escalar (al final)
+				// 4. Construir la matriz de modelo
+				glm::mat4 model = glm::mat4(1.0f);
+				model = glm::translate(model, newPos);
+				model = glm::rotate(model, yaw, glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::scale(model, glm::vec3(0.001f, 0.001f, 0.001f));
+				butterflyShader->setMat4("model", model);
 
-			butterflyShader->setMat4("model", model);
+				// 5. Enviar Huesos (Bones)
+				butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, butterfly->gBones);
 
-			// --- ¡LA MAGIA DE ANIMACIÓN! ---
-			// Enviamos los datos de los huesos al shader
-			butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, butterfly->gBones);
+				// 6. ¡Dibujar!
+				butterfly->Draw(*butterflyShader);
+			}
 
-			// ¡Dibujar!
-			butterfly->Draw(*butterflyShader);
+			// --- AÑADIDO: DIBUJAR COLIBRI (Estático por ahora) ---
+			{
+				// 1. Construir la matriz de modelo (estática)
+				// Usamos las variables globales que ya tenías
+				glm::mat4 model = glm::mat4(1.0f);
+				model = glm::translate(model, glm::vec3(8.0f, 0.7f, -16.6f)); // <-- Posición estática
+				model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f)); // <-- AJUSTA LA ESCALA (quizás es diferente a la mariposa)
+				butterflyShader->setMat4("model", model);
+
+				// 2. Enviar Huesos (Bones)
+				butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, colibri->gBones);
+
+				// 3. ¡Dibujar!
+				colibri->Draw(*butterflyShader);
+			}
+			// --- AÑADIDO: DIBUJAR Jaguar (Estático por ahora) ---
+			{
+				// 1. Construir la matriz de modelo (estática)
+				// Usamos las variables globales que ya tenías
+				glm::mat4 model = glm::mat4(1.0f);
+				model = glm::translate(model, glm::vec3(-3.5f, 0.25f, -7.0f)); // <-- Posición estática
+				model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // <-- AJUSTA LA ESCALA (quizás es diferente a la mariposa)
+				model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				butterflyShader->setMat4("model", model);
+
+				// 2. Enviar Huesos (Bones)
+				butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, conejo->gBones);
+
+				// 3. ¡Dibujar!
+				conejo->Draw(*butterflyShader);
+			}
+			/*
+			// --- AÑADIDO: DIBUJAR Jaguar (Estático por ahora) ---
+			{
+				// 1. Construir la matriz de modelo (estática)
+				// Usamos las variables globales que ya tenías
+				glm::mat4 model = glm::mat4(1.0f);
+				model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f)); // <-- Posición estática
+				model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f)); // <-- AJUSTA LA ESCALA (quizás es diferente a la mariposa)
+				model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+				butterflyShader->setMat4("model", model);
+
+				// 2. Enviar Huesos (Bones)
+				butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, iguana->gBones);
+
+				// 3. ¡Dibujar!
+				iguana->Draw(*butterflyShader);
+			}*/
+
+			{
+				// 1. Construir la matriz de modelo (estática)
+				// Usamos las variables globales que ya tenías
+				glm::mat4 model = glm::mat4(1.0f);
+				model = glm::translate(model, glm::vec3(2.5f, 0.2f, -5.0f)); // <-- Posición estática
+				model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // <-- AJUSTA LA ESCALA (quizás es diferente a la mariposa)
+				model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+				butterflyShader->setMat4("model", model);
+
+				// 2. Enviar Huesos (Bones)
+				butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, serpiente->gBones);
+
+				// 3. ¡Dibujar!
+				serpiente->Draw(*butterflyShader);
+			}
 		}
 
 	}
