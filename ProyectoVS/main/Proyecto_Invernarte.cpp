@@ -1,14 +1,14 @@
 /*
 *
-* Proyecto Base Galería Estática
+* Proyecto InvernArte
 *
 */
 
 #include <iostream>
 #include <stdlib.h>
-#include <vector> // Asegúrate de tener esta (para las luces)
-#include <string> // Y esta (para los helpers de luces)
-#include <sstream> // Y esta (para los helpers de luces)
+#include <vector> 
+#include <string> 
+#include <sstream> 
 
 // GLAD
 #include <glad/glad.h>
@@ -21,7 +21,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// Clases de carga (Headers de tu proyecto)
+// Clases de carga 
 #include <shader_m.h>
 #include <camera.h>
 #include <model.h>
@@ -68,13 +68,13 @@ const float VELOCIDAD_NORMAL = 5.0f;
 const float VELOCIDAD_SPRINT = 20.0f;
 
 // Shaders
-Shader *staticLightShader; // Renombrado de mLightsShader para más claridad
+Shader *staticLightShader; 
 Shader *cubemapShader;
 Shader* butterflyShader;
 //Shader* dynamicShader;
 
 // Modelos
-Model *paredes; // Tu modelo de galería estática
+Model *paredes;
 Model* piso;
 Model *plano;
 Model* letras;
@@ -106,12 +106,12 @@ CubeMap *mainCubeMap;
 // Luces
 std::vector<Light> gLights;
 
-// Materiales (puedes definir más si tu galería usa varios)
+// Materiales 
 Material materialPrincipal;
 Material materialPiso;
 Material materialMueblesSala;
 
-// --- Funciones de ayuda para luces (Copiadas de tu práctica) ---
+// --- Funciones de ayuda para luces 
 void SetLightUniformInt(Shader *shader, const char* propertyName, size_t lightIndex, int value) {
 	std::ostringstream ss;
 	ss << "allLights[" << lightIndex << "]." << propertyName;
@@ -136,7 +136,7 @@ void SetLightUniformVec3(Shader *shader, const char* propertyName, size_t lightI
 	std::string uniformName = ss.str();
 	shader->setVec3(uniformName.c_str(), value);
 }
-// --- Fin de funciones de ayuda ---
+// 
 
 
 // Entrada a función principal
@@ -145,7 +145,6 @@ int main()
 	if (!Start())
 		return -1;
 
-	/* Loop principal de renderizado */
 	while (!glfwWindowShouldClose(window))
 	{
 		if (!Update())
@@ -190,17 +189,16 @@ bool Start() {
 	glEnable(GL_DEPTH_TEST);
 	
 
-	// Compilación de shaders (¡Necesitaré estos archivos!)
+	// Compilación de shaders 
 	staticLightShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
 	cubemapShader = new Shader("shaders/10_vertex_cubemap.vs", "shaders/10_fragment_cubemap.fs");
 	//dynamicShader = new Shader("shaders/10_skinning-IT.vs");
 	butterflyShader = new Shader("shaders/17_mariposa.vs", "shaders/17_mariposa.fs");
-	butterflyShader->setBonesIDs(MAX_RIGGING_BONES); // ¡Importante!
+	butterflyShader->setBonesIDs(MAX_RIGGING_BONES);
 
 
-	// Carga del modelo de la galería
-	// Asegúrate que la ruta sea correcta dentro de tu carpeta 'bin'
-	paredes = new Model("models/Paredes.fbx"); // <-- CAMBIA "galeria.fbx" POR EL NOMBRE DE TU ARCHIVO
+	// Carga de modelos galería
+	paredes = new Model("models/Paredes.fbx"); 
 	piso = new Model("models/Piso.fbx");
 	plano = new Model("models/Plano.fbx");
 	letras = new Model("models/Letras.fbx");
@@ -226,7 +224,7 @@ bool Start() {
 	//iguana = new AnimatedModel("models/Iguana.fbx");
 	serpiente = new AnimatedModel("models/Serpiente.fbx");
 
-	// Carga del Cubemap (fondo)
+	// Carga del Cubemap
 	vector<std::string> faces
 	{
 		"textures/cubemap/01/posx.png",
@@ -235,23 +233,11 @@ bool Start() {
 		"textures/cubemap/01/negy.png",
 		"textures/cubemap/01/posz.png",
 		"textures/cubemap/01/negz.png"
-		// Asegúrate que estas texturas existan en 'bin/textures/...'
 	};
 	mainCubeMap = new CubeMap();
 	mainCubeMap->loadCubemap(faces);
 
-	// Configuración de luces (puedes ajustar esto como necesites)
-	/*
-	Light light01;
-	light01.Position = glm::vec3(5.0f, 2.0f, 5.0f);
-	light01.Color = glm::vec4(0.3f, 0.3f, 0.3f, 1.0f);
-	gLights.push_back(light01);
-	
-	Light light02;
-	light02.Position = glm::vec3(-5.0f, 2.0f, 5.0f);
-	light02.Color = glm::vec4(0.3f, 0.3f, 0.3f, 1.0f);
-	gLights.push_back(light02);
-	*/
+	// Configuración de luces 
 
 	Light light_sol;
 	light_sol.Position = glm::vec3(0.0f, 50.0f, 0.0f);   // Posición MUY ALTA, en el cielo
@@ -263,7 +249,6 @@ bool Start() {
 	gLights.push_back(light_sol);
 
 	//_______LUCES SALA
-	// Configuración de luces (puedes ajustar esto como necesites)
 	Light light01;				//(X, Y, Z)
 	light01.Position = glm::vec3(5.0f, 4.4f, 5.0f);   // Posición
 	light01.Direction = glm::vec3(0.0f, -1.0f, 0.0f); // Dirección (apuntando hacia abajo)
@@ -300,8 +285,7 @@ bool Start() {
 	light04.distance = 2.0f;
 	gLights.push_back(light04);
 
-	//_________Luces CAfe
-
+	//_________Luces Cafe
 	Light light05;
 	light05.Position = glm::vec3(-18.0f, 4.4f, -5.0f);
 	light05.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -332,8 +316,6 @@ bool Start() {
 	materialPiso.specular = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // ¡CERO BRILLO!
 	materialPiso.transparency = 1.0f;
 
-	// --- AÑADIDO: Configurar velocidad inicial de la cámara ---
-	camera.MovementSpeed = VELOCIDAD_NORMAL;
 
 	//---MATERIAL Muebles de la sala
 	materialMueblesSala.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
@@ -341,6 +323,7 @@ bool Start() {
 	materialMueblesSala.specular = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // ¡CERO BRILLO!
 	materialMueblesSala.transparency = 1.0f;
 
+	camera.MovementSpeed = VELOCIDAD_NORMAL;
 	return true;
 }
 
@@ -354,7 +337,6 @@ bool Update() {
 	// Procesar entrada
 	processInput(window);
 
-	// --- AÑADIDO: Actualizar la animación de la mariposa ---
 	butterfly->UpdateAnimation(deltaTime);
 	colibri->UpdateAnimation(deltaTime);
 	conejo->UpdateAnimation(deltaTime); 
@@ -369,12 +351,12 @@ bool Update() {
 	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 10000.0f);
 	glm::mat4 view = camera.GetViewMatrix();
 
-	// 1. Dibujar el Cubemap (fondo)
+	// 1. Dibujar el Cubemap 
 	{
 		mainCubeMap->drawCubeMap(*cubemapShader, projection, view);
 	}
 
-	// 2. Dibujar la Galería (Modelo Estático)
+	// 2. Dibujar la Galería 
 	{
 		staticLightShader->use();
 
@@ -385,15 +367,6 @@ bool Update() {
 		staticLightShader->setMat4("projection", projection);
 		staticLightShader->setMat4("view", view);
 
-		/*
-		// Configuración de luces
-		staticLightShader->setInt("numLights", (int)gLights.size());
-		for (size_t i = 0; i < gLights.size(); ++i) {
-			SetLightUniformVec3(staticLightShader, "Position", i, gLights[i].Position);
-			SetLightUniformVec4(staticLightShader, "Color", i, gLights[i].Color);
-			// ... (puedes añadir más propiedades de luz si tu shader las usa)
-		}
-		*/
 		// Configuración de luces
 		staticLightShader->setInt("numLights", (int)gLights.size());
 		for (size_t i = 0; i < gLights.size(); ++i) {
@@ -426,7 +399,6 @@ bool Update() {
 		}
 		// Modelo Puerta Derecha
 		{
-			// ¡¡ Matriz 'model' NUEVA para esta puerta !!
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 19.85f)); // Posición base
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación base
@@ -465,7 +437,7 @@ bool Update() {
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
-			piso->Draw(*staticLightShader); //¡Dibujamos la galería!
+			piso->Draw(*staticLightShader); 
 		}
 
 		staticLightShader->setVec4("MaterialAmbientColor", materialPrincipal.ambient);
@@ -645,13 +617,13 @@ bool Update() {
 		}
 
 		
-		//Modelo Mariposa Animada (Y COLIBRÍ)
+		//Modelos Animados
 		{
 			// ¡Usamos el shader de animación!
 			butterflyShader->use();
 			glDisable(GL_BLEND);
 
-			// --- ENVIAMOS UNIFORMES COMUNES (para ambos modelos) ---
+			// --- ENVIAMOS UNIFORMES COMUNES ---
 			// Cámara
 			butterflyShader->setMat4("projection", projection);
 			butterflyShader->setMat4("view", view);
@@ -668,14 +640,14 @@ bool Update() {
 				SetLightUniformFloat(butterflyShader, "distance", i, gLights[i].distance);
 			}
 
-			// Material (usamos el principal para ambos)
+			// Material 
 			butterflyShader->setVec4("MaterialAmbientColor", materialPrincipal.ambient);
 			butterflyShader->setVec4("MaterialDiffuseColor", materialPrincipal.diffuse);
 			butterflyShader->setVec4("MaterialSpecularColor", materialPrincipal.specular);
 			butterflyShader->setFloat("transparency", materialPrincipal.transparency);
 
 
-			// --- DIBUJAR MARIPOSA (Con su movimiento) ---
+			// --- DIBUJAR MARIPOSA 
 			{
 				// 1. Parámetros del círculo
 				float radius = 5.0f;
@@ -706,10 +678,9 @@ bool Update() {
 				butterfly->Draw(*butterflyShader);
 			}
 
-			// --- AÑADIDO: DIBUJAR COLIBRI (Estático por ahora) ---
+			// --- DIBUJAR COLIBRI 
 			{
 				// 1. Construir la matriz de modelo (estática)
-				// Usamos las variables globales que ya tenías
 				glm::mat4 model = glm::mat4(1.0f);
 				model = glm::translate(model, glm::vec3(8.0f, 0.7f, -16.6f)); // <-- Posición estática
 				model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f)); // <-- AJUSTA LA ESCALA (quizás es diferente a la mariposa)
@@ -721,10 +692,9 @@ bool Update() {
 				// 3. ¡Dibujar!
 				colibri->Draw(*butterflyShader);
 			}
-			// --- AÑADIDO: DIBUJAR Jaguar (Estático por ahora) ---
+			// --- DIBUJAR Conejo
 			{
 				// 1. Construir la matriz de modelo (estática)
-				// Usamos las variables globales que ya tenías
 				glm::mat4 model = glm::mat4(1.0f);
 				model = glm::translate(model, glm::vec3(-3.5f, 0.25f, -7.0f)); // <-- Posición estática
 				model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // <-- AJUSTA LA ESCALA (quizás es diferente a la mariposa)
@@ -754,10 +724,9 @@ bool Update() {
 				// 3. ¡Dibujar!
 				iguana->Draw(*butterflyShader);
 			}*/
-
+			// --- DIBUJAR Serpiente
 			{
-				// 1. Construir la matriz de modelo (estática)
-				// Usamos las variables globales que ya tenías
+				// 1. Construir la matriz de modelo 
 				glm::mat4 model = glm::mat4(1.0f);
 				model = glm::translate(model, glm::vec3(2.5f, 0.2f, -5.0f)); // <-- Posición estática
 				model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // <-- AJUSTA LA ESCALA (quizás es diferente a la mariposa)
