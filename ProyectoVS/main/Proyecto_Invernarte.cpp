@@ -59,6 +59,10 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+// Variables puertas
+float der = 0.0f;
+float izq = 0.0f;
+
 // --- AÑADIDO: Constantes de Velocidad ---
 const float VELOCIDAD_NORMAL = 5.0f;
 const float VELOCIDAD_SPRINT = 20.0f;
@@ -88,6 +92,8 @@ Model* pinturas2;
 Model* esculturas;
 Model* lampstecho;
 Model* terrario;
+Model* puertaprind;
+Model* puertaprini;
 AnimatedModel* butterfly;
 AnimatedModel* colibri;
 AnimatedModel* conejo;
@@ -212,6 +218,8 @@ bool Start() {
 	esculturas = new Model("models/Esculturas.fbx");
 	lampstecho = new Model("models/LampsTecho.fbx"); 
 	terrario = new Model("models/Terrario.fbx");
+	puertaprind = new Model("models/PuertaPrinD.fbx");
+	puertaprini = new Model("models/PuertaPrinI.fbx");
 	butterfly = new AnimatedModel("models/Mariposa.fbx");
 	colibri = new AnimatedModel("models/Colibri.fbx");
 	conejo = new AnimatedModel("models/Conejo.fbx");
@@ -414,6 +422,35 @@ bool Update() {
 			staticLightShader->setMat4("model", model);
 
 			paredes->Draw(*staticLightShader); //¡Dibujamos la galería!
+
+		}
+		// Modelo Puerta Derecha
+		{
+			// ¡¡ Matriz 'model' NUEVA para esta puerta !!
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 19.85f)); // Posición base
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación base
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala base
+
+			// Ahora aplicamos el movimiento dinámico (solo en X)
+			model = glm::translate(model, glm::vec3(der, 0.0f, 0.0f));
+
+			staticLightShader->setMat4("model", model);
+			puertaprind->Draw(*staticLightShader);
+		} 
+
+		// Modelo Puerta Izquierda
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 19.85f)); // Posición base
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación base
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala base
+
+			// Ahora aplicamos el movimiento dinámico (solo en X)
+			model = glm::translate(model, glm::vec3(izq, 0.0f, 0.0f));
+
+			staticLightShader->setMat4("model", model);
+			puertaprini->Draw(*staticLightShader);
 		}
 		// Modelo Piso
 		{
@@ -758,6 +795,16 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 	
+	if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+		if (der < 2.0f) {
+			der += 0.01f;
+			izq -= 0.01f;
+		}
+	if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
+		if (der > 0.0f) {
+			der -= 0.01f;
+			izq += 0.01f;
+		}
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera.ProcessKeyboard(FORWARD, deltaTime);
