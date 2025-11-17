@@ -1,4 +1,4 @@
-/*
+Ôªø/*
 *
 * Proyecto InvernArte
 *
@@ -34,7 +34,7 @@
 bool Start();
 bool Update();
 
-// DefiniciÛn de callbacks
+// Definici√≥n de callbacks
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
@@ -43,11 +43,11 @@ void processInput(GLFWwindow *window);
 // Globales
 GLFWwindow *window;
 
-// TamaÒo de la ventana
-const unsigned int SCR_WIDTH = 900;
-const unsigned int SCR_HEIGHT = 600;
+// Tama√±o de la ventana
+const unsigned int SCR_WIDTH = 1920;
+const unsigned int SCR_HEIGHT = 1080;
 
-// DefiniciÛn de c·mara (posiciÛn inicial en XYZ)
+// Definici√≥n de c√°mara (posici√≥n inicial en XYZ)
 Camera camera(glm::vec3(0.0f, 1.72f, 30.0f));
 
 // Controladores para el movimiento del mouse
@@ -62,8 +62,19 @@ float lastFrame = 0.0f;
 // Variables puertas
 float der = 0.0f;
 float izq = 0.0f;
+bool puertasAbiertas = false;
+bool animandoPuertas = false;
+float velocidadPuertas = 2.0f;
+float der2 = 0.0f;
+float izq2 = 0.0f;
+bool puertas2Abiertas = false;
+bool animandoPuertas2 = false;
+float velocidadPuertas2 = 2.0f;
 
-// --- A—ADIDO: Constantes de Velocidad ---
+const float PUERTA_CERRADA = 0.0f;
+const float PUERTA_ABIERTA = 2.0f;
+
+// --- Constantes de Velocidad ---
 const float VELOCIDAD_NORMAL = 5.0f;
 const float VELOCIDAD_SPRINT = 20.0f;
 
@@ -139,7 +150,7 @@ void SetLightUniformVec3(Shader *shader, const char* propertyName, size_t lightI
 // 
 
 
-// Entrada a funciÛn principal
+// Entrada a funci√≥n principal
 int main()
 {
 	if (!Start())
@@ -156,13 +167,13 @@ int main()
 }
 
 bool Start() {
-	// InicializaciÛn de GLFW
+	// Inicializaci√≥n de GLFW
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// CreaciÛn de la ventana
+	// Creaci√≥n de la ventana
 	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Proyecto InvernArte", NULL, NULL);
 	if (window == NULL)
 	{
@@ -185,11 +196,11 @@ bool Start() {
 		return false;
 	}
 
-	// ActivaciÛn de buffer de profundidad
+	// Activaci√≥n de buffer de profundidad
 	glEnable(GL_DEPTH_TEST);
 	
 
-	// CompilaciÛn de shaders 
+	// Compilaci√≥n de shaders 
 	staticLightShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
 	cubemapShader = new Shader("shaders/10_vertex_cubemap.vs", "shaders/10_fragment_cubemap.fs");
 	//dynamicShader = new Shader("shaders/10_skinning-IT.vs");
@@ -197,7 +208,7 @@ bool Start() {
 	butterflyShader->setBonesIDs(MAX_RIGGING_BONES);
 
 
-	// Carga de modelos galerÌa
+	// Carga de modelos galer√≠a
 	paredes = new Model("models/Paredes.fbx"); 
 	piso = new Model("models/Piso.fbx");
 	plano = new Model("models/Plano.fbx");
@@ -237,24 +248,24 @@ bool Start() {
 	mainCubeMap = new CubeMap();
 	mainCubeMap->loadCubemap(faces);
 
-	// ConfiguraciÛn de luces 
+	// Configuraci√≥n de luces 
 
 	Light light_sol;
-	light_sol.Position = glm::vec3(0.0f, 50.0f, 0.0f);   // PosiciÛn MUY ALTA, en el cielo
+	light_sol.Position = glm::vec3(0.0f, 50.0f, 0.0f);   // Posici√≥n MUY ALTA, en el cielo
 	light_sol.Direction = glm::vec3(0.0f, -1.0f, 0.0f);  // Apuntando directo hacia abajo
-	light_sol.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // Un color c·lido, ligeramente amarillo
-	light_sol.Power = glm::vec4(1.2f, 1.2f, 1.2f, 1.0f); // Un poco m·s de potencia que los focos
+	light_sol.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // Un color c√°lido, ligeramente amarillo
+	light_sol.Power = glm::vec4(1.2f, 1.2f, 1.2f, 1.0f); // Un poco m√°s de potencia que los focos
 	light_sol.alphaIndex = 32;                           // Brillo especular
-	light_sol.distance = 1.0f;                           // Mantenemos la misma atenuaciÛn
+	light_sol.distance = 1.0f;                           // Mantenemos la misma atenuaci√≥n
 	gLights.push_back(light_sol);
 
 	//_______LUCES SALA
 	Light light01;				//(X, Y, Z)
-	light01.Position = glm::vec3(5.0f, 4.4f, 5.0f);   // PosiciÛn
-	light01.Direction = glm::vec3(0.0f, -1.0f, 0.0f); // DirecciÛn (apuntando hacia abajo)
-	light01.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f); // Color (m·s brillante)
+	light01.Position = glm::vec3(5.0f, 4.4f, 5.0f);   // Posici√≥n
+	light01.Direction = glm::vec3(0.0f, -1.0f, 0.0f); // Direcci√≥n (apuntando hacia abajo)
+	light01.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f); // Color (m√°s brillante)
 	light01.Power = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f); // Potencia
-	light01.alphaIndex = 32;                          // Õndice especular
+	light01.alphaIndex = 32;                          // √çndice especular
 	light01.distance = 2.0f;                         // <-- ARREGLADO
 	gLights.push_back(light01);
 
@@ -313,14 +324,14 @@ bool Start() {
 	//---MATERIAL Piso
 	materialPiso.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 	materialPiso.diffuse = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f); // Usa el color claro de tu madera
-	materialPiso.specular = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // °CERO BRILLO!
+	materialPiso.specular = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // ¬°CERO BRILLO!
 	materialPiso.transparency = 1.0f;
 
 
 	//---MATERIAL Muebles de la sala
 	materialMueblesSala.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 	materialMueblesSala.diffuse = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f); // Un gris medio para la tela
-	materialMueblesSala.specular = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // °CERO BRILLO!
+	materialMueblesSala.specular = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // ¬°CERO BRILLO!
 	materialMueblesSala.transparency = 1.0f;
 
 	camera.MovementSpeed = VELOCIDAD_NORMAL;
@@ -329,13 +340,65 @@ bool Start() {
 
 
 bool Update() {
-	// C·lculo del framerate
+	// C√°lculo del framerate
 	float currentFrame = (float)glfwGetTime();
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 
 	// Procesar entrada
 	processInput(window);
+
+	// ========== ANIMACI√ìN DE PUERTAS PRINCIPALES ==========
+	if (animandoPuertas) {
+		if (puertasAbiertas) {
+			// Abriendo
+			der += velocidadPuertas * deltaTime;
+			izq -= velocidadPuertas * deltaTime;
+
+			if (der >= PUERTA_ABIERTA) {
+				der = PUERTA_ABIERTA;
+				izq = -PUERTA_ABIERTA;
+				animandoPuertas = false;
+			}
+		}
+		else {
+			// Cerrando
+			der -= velocidadPuertas * deltaTime;
+			izq += velocidadPuertas * deltaTime;
+
+			if (der <= PUERTA_CERRADA) {
+				der = PUERTA_CERRADA;
+				izq = PUERTA_CERRADA;
+				animandoPuertas = false;
+			}
+		}
+	}
+
+	// ========== ANIMACI√ìN DEL SEGUNDO PAR DE PUERTAS ==========
+	if (animandoPuertas2) {
+		if (puertas2Abiertas) {
+			// Abriendo
+			der2 += velocidadPuertas2 * deltaTime;
+			izq2 -= velocidadPuertas2 * deltaTime;
+
+			if (der2 >= PUERTA_ABIERTA) {
+				der2 = PUERTA_ABIERTA;
+				izq2 = -PUERTA_ABIERTA;
+				animandoPuertas2 = false;
+			}
+		}
+		else {
+			// Cerrando
+			der2 -= velocidadPuertas2 * deltaTime;
+			izq2 += velocidadPuertas2 * deltaTime;
+
+			if (der2 <= PUERTA_CERRADA) {
+				der2 = PUERTA_CERRADA;
+				izq2 = PUERTA_CERRADA;
+				animandoPuertas2 = false;
+			}
+		}
+	}
 
 	butterfly->UpdateAnimation(deltaTime);
 	colibri->UpdateAnimation(deltaTime);
@@ -347,7 +410,7 @@ bool Update() {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Matrices de Vista y ProyecciÛn (solo c·mara en 1ra persona)
+	// Matrices de Vista y Proyecci√≥n (solo c√°mara en 1ra persona)
 	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 10000.0f);
 	glm::mat4 view = camera.GetViewMatrix();
 
@@ -356,7 +419,7 @@ bool Update() {
 		mainCubeMap->drawCubeMap(*cubemapShader, projection, view);
 	}
 
-	// 2. Dibujar la GalerÌa 
+	// 2. Dibujar la Galer√≠a 
 	{
 		staticLightShader->use();
 
@@ -367,7 +430,7 @@ bool Update() {
 		staticLightShader->setMat4("projection", projection);
 		staticLightShader->setMat4("view", view);
 
-		// ConfiguraciÛn de luces
+		// Configuraci√≥n de luces
 		staticLightShader->setInt("numLights", (int)gLights.size());
 		for (size_t i = 0; i < gLights.size(); ++i) {
 			SetLightUniformVec3(staticLightShader, "Position", i, gLights[i].Position);
@@ -389,22 +452,22 @@ bool Update() {
 		// Modelo Paredes
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
-			paredes->Draw(*staticLightShader); //°Dibujamos la galerÌa!
+			paredes->Draw(*staticLightShader); //¬°Dibujamos la galer√≠a!
 
 		}
 		// Modelo Puerta Derecha
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 19.85f)); // PosiciÛn base
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn base
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 19.85f)); // Posici√≥n base
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n base
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala base
 
-			// Ahora aplicamos el movimiento din·mico (solo en X)
+			// Ahora aplicamos el movimiento din√°mico (solo en X)
 			model = glm::translate(model, glm::vec3(der, 0.0f, 0.0f));
 
 			staticLightShader->setMat4("model", model);
@@ -414,15 +477,42 @@ bool Update() {
 		// Modelo Puerta Izquierda
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 19.85f)); // PosiciÛn base
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn base
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 19.85f)); // Posici√≥n base
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n base
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala base
 
-			// Ahora aplicamos el movimiento din·mico (solo en X)
+			// Ahora aplicamos el movimiento din√°mico (solo en X)
 			model = glm::translate(model, glm::vec3(izq, 0.0f, 0.0f));
 
 			staticLightShader->setMat4("model", model);
 			puertaprini->Draw(*staticLightShader);
+		}
+		// Puerta Derecha 2
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(-20.0f, 0.0f, -1.28f)); // EN EL ORIGEN
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(1.25f, 1.0f, 1.0f));
+
+			// Movimiento din√°mico
+			model = glm::translate(model, glm::vec3(der2, 0.0f, 0.0f));
+
+			staticLightShader->setMat4("model", model);
+			puertaprind->Draw(*staticLightShader); // ‚Üê ¬°Reutilizamos el mismo modelo!
+		}
+
+		// Puerta Izquierda 2
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(-20.0f, 0.0f, -1.28f)); // EN EL ORIGEN
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(1.25f, 1.0f, 1.0f));
+
+			// Movimiento din√°mico
+			model = glm::translate(model, glm::vec3(izq2, 0.0f, 0.0f));
+
+			staticLightShader->setMat4("model", model);
+			puertaprini->Draw(*staticLightShader); // ‚Üê ¬°Reutilizamos el mismo modelo!
 		}
 		// Modelo Piso
 		{
@@ -432,8 +522,8 @@ bool Update() {
 			staticLightShader->setFloat("transparency", materialPiso.transparency);
 
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -448,8 +538,8 @@ bool Update() {
 		//Modelo Plano
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -458,8 +548,8 @@ bool Update() {
 		//Modelo Letras
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -468,8 +558,8 @@ bool Update() {
 		//Modelo MasetasInv
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -478,8 +568,8 @@ bool Update() {
 		//Modelo MesasSillasCafe
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -488,8 +578,8 @@ bool Update() {
 		//Modelo Muebles Cafe
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -498,8 +588,8 @@ bool Update() {
 		//Modelo Electrodomesticos
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -508,8 +598,8 @@ bool Update() {
 		//Modelo Adicionales de la cafe
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -518,8 +608,8 @@ bool Update() {
 		//Modelo Consumibles Cafe(donas, vasos)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -533,8 +623,8 @@ bool Update() {
 			staticLightShader->setFloat("transparency", materialMueblesSala.transparency);
 			
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -548,8 +638,8 @@ bool Update() {
 			staticLightShader->setFloat("transparency", materialPrincipal.transparency);
 
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -558,8 +648,8 @@ bool Update() {
 		//Modelo Plantas Invernadero
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -568,8 +658,8 @@ bool Update() {
 		//Modelo Pinturas
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -578,8 +668,8 @@ bool Update() {
 		//Modelo Pinturas2
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -588,8 +678,8 @@ bool Update() {
 		//Modelo Esculturas
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -598,8 +688,8 @@ bool Update() {
 		//Modelo Lamps Techo
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -608,8 +698,8 @@ bool Update() {
 		//Modelo Terrario
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // PosiciÛn en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // RotaciÛn
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posici√≥n en el mundo
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotaci√≥n
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
@@ -619,12 +709,12 @@ bool Update() {
 		
 		//Modelos Animados
 		{
-			// °Usamos el shader de animaciÛn!
+			// ¬°Usamos el shader de animaci√≥n!
 			butterflyShader->use();
 			glDisable(GL_BLEND);
 
 			// --- ENVIAMOS UNIFORMES COMUNES ---
-			// C·mara
+			// C√°mara
 			butterflyShader->setMat4("projection", projection);
 			butterflyShader->setMat4("view", view);
 			butterflyShader->setVec3("eye", camera.Position);
@@ -649,19 +739,19 @@ bool Update() {
 
 			// --- DIBUJAR MARIPOSA 
 			{
-				// 1. Par·metros del cÌrculo
+				// 1. Par√°metros del c√≠rculo
 				float radius = 5.0f;
 				float speed = 0.5f;
 				glm::vec3 center = glm::vec3(0.0f, 3.0f, -20.0f);
 
-				// 2. Calcular posiciÛn basada en el tiempo
+				// 2. Calcular posici√≥n basada en el tiempo
 				float time = (float)glfwGetTime();
 				float angle = time * speed;
 				float newX = center.x + radius * cos(angle);
 				float newZ = center.z + radius * sin(angle);
 				glm::vec3 newPos = glm::vec3(newX, center.y, newZ);
 
-				// 3. Calcular orientaciÛn
+				// 3. Calcular orientaci√≥n
 				float yaw = -angle + glm::radians(0.0f);
 
 				// 4. Construir la matriz de modelo
@@ -674,69 +764,69 @@ bool Update() {
 				// 5. Enviar Huesos (Bones)
 				butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, butterfly->gBones);
 
-				// 6. °Dibujar!
+				// 6. ¬°Dibujar!
 				butterfly->Draw(*butterflyShader);
 			}
 
 			// --- DIBUJAR COLIBRI 
 			{
-				// 1. Construir la matriz de modelo (est·tica)
+				// 1. Construir la matriz de modelo (est√°tica)
 				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::translate(model, glm::vec3(8.0f, 0.7f, -16.6f)); // <-- PosiciÛn est·tica
-				model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f)); // <-- AJUSTA LA ESCALA (quiz·s es diferente a la mariposa)
+				model = glm::translate(model, glm::vec3(8.0f, 0.7f, -16.6f)); // <-- Posici√≥n est√°tica
+				model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f)); // <-- AJUSTA LA ESCALA (quiz√°s es diferente a la mariposa)
 				butterflyShader->setMat4("model", model);
 
 				// 2. Enviar Huesos (Bones)
 				butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, colibri->gBones);
 
-				// 3. °Dibujar!
+				// 3. ¬°Dibujar!
 				colibri->Draw(*butterflyShader);
 			}
 			// --- DIBUJAR Conejo
 			{
-				// 1. Construir la matriz de modelo (est·tica)
+				// 1. Construir la matriz de modelo (est√°tica)
 				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::translate(model, glm::vec3(-3.5f, 0.25f, -7.0f)); // <-- PosiciÛn est·tica
-				model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // <-- AJUSTA LA ESCALA (quiz·s es diferente a la mariposa)
+				model = glm::translate(model, glm::vec3(-3.5f, 0.25f, -7.0f)); // <-- Posici√≥n est√°tica
+				model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // <-- AJUSTA LA ESCALA (quiz√°s es diferente a la mariposa)
 				model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 				butterflyShader->setMat4("model", model);
 
 				// 2. Enviar Huesos (Bones)
 				butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, conejo->gBones);
 
-				// 3. °Dibujar!
+				// 3. ¬°Dibujar!
 				conejo->Draw(*butterflyShader);
 			}
 			/*
-			// --- A—ADIDO: DIBUJAR Jaguar (Est·tico por ahora) ---
+			// --- A√ëADIDO: DIBUJAR Jaguar (Est√°tico por ahora) ---
 			{
-				// 1. Construir la matriz de modelo (est·tica)
-				// Usamos las variables globales que ya tenÌas
+				// 1. Construir la matriz de modelo (est√°tica)
+				// Usamos las variables globales que ya ten√≠as
 				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f)); // <-- PosiciÛn est·tica
-				model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f)); // <-- AJUSTA LA ESCALA (quiz·s es diferente a la mariposa)
+				model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f)); // <-- Posici√≥n est√°tica
+				model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f)); // <-- AJUSTA LA ESCALA (quiz√°s es diferente a la mariposa)
 				model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 				butterflyShader->setMat4("model", model);
 
 				// 2. Enviar Huesos (Bones)
 				butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, iguana->gBones);
 
-				// 3. °Dibujar!
+				// 3. ¬°Dibujar!
 				iguana->Draw(*butterflyShader);
 			}*/
 			// --- DIBUJAR Serpiente
 			{
 				// 1. Construir la matriz de modelo 
 				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::translate(model, glm::vec3(2.5f, 0.2f, -5.0f)); // <-- PosiciÛn est·tica
-				model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // <-- AJUSTA LA ESCALA (quiz·s es diferente a la mariposa)
+				model = glm::translate(model, glm::vec3(2.5f, 0.2f, -5.0f)); // <-- Posici√≥n est√°tica
+				model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // <-- AJUSTA LA ESCALA (quiz√°s es diferente a la mariposa)
 				model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 				butterflyShader->setMat4("model", model);
 
 				// 2. Enviar Huesos (Bones)
 				butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, serpiente->gBones);
 
-				// 3. °Dibujar!
+				// 3. ¬°Dibujar!
 				serpiente->Draw(*butterflyShader);
 			}
 		}
@@ -764,16 +854,57 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 	
-	if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
-		if (der < 2.0f) {
-			der += 0.01f;
-			izq -= 0.01f;
+	// ========== PUERTAS PRINCIPALES (H = cerrar, J = abrir) ==========
+	static bool teclaJ_presionada = false;
+	static bool teclaH_presionada = false;
+
+	if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS && !teclaJ_presionada) {
+		if (!puertasAbiertas && !animandoPuertas) {
+			animandoPuertas = true;
+			puertasAbiertas = true;
 		}
-	if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
-		if (der > 0.0f) {
-			der -= 0.01f;
-			izq += 0.01f;
+		teclaJ_presionada = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_J) == GLFW_RELEASE) {
+		teclaJ_presionada = false;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS && !teclaH_presionada) {
+		if (puertasAbiertas && !animandoPuertas) {
+			animandoPuertas = true;
+			puertasAbiertas = false;
 		}
+		teclaH_presionada = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_H) == GLFW_RELEASE) {
+		teclaH_presionada = false;
+	}
+
+	// ========== SEGUNDO PAR DE PUERTAS (Y = cerrar, U = abrir) ==========
+	static bool teclaU_presionada = false;
+	static bool teclaY_presionada = false;
+
+	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS && !teclaU_presionada) {
+		if (!puertas2Abiertas && !animandoPuertas2) {
+			animandoPuertas2 = true;
+			puertas2Abiertas = true;
+		}
+		teclaU_presionada = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_RELEASE) {
+		teclaU_presionada = false;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS && !teclaY_presionada) {
+		if (puertas2Abiertas && !animandoPuertas2) {
+			animandoPuertas2 = true;
+			puertas2Abiertas = false;
+		}
+		teclaY_presionada = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_RELEASE) {
+		teclaY_presionada = false;
+	}
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -793,7 +924,7 @@ void processInput(GLFWwindow* window)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); // Puntos
 }
 
-// Callback: Actualizar viewport si la ventana cambia de tamaÒo
+// Callback: Actualizar viewport si la ventana cambia de tama√±o
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
