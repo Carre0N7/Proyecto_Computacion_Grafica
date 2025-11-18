@@ -35,13 +35,13 @@ bool Start();
 bool Update();
 
 // Definición de callbacks
-void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-void mouse_callback(GLFWwindow *window, double xpos, double ypos);
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
-void processInput(GLFWwindow *window);
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void processInput(GLFWwindow* window);
 
 // Globales
-GLFWwindow *window;
+GLFWwindow* window;
 
 // Tamaño de la ventana
 const unsigned int SCR_WIDTH = 1920;
@@ -79,15 +79,15 @@ const float VELOCIDAD_NORMAL = 5.0f;
 const float VELOCIDAD_SPRINT = 20.0f;
 
 // Shaders
-Shader *staticLightShader; 
-Shader *cubemapShader;
+Shader* staticLightShader;
+Shader* cubemapShader;
 Shader* butterflyShader;
 //Shader* dynamicShader;
 
 // Modelos
-Model *paredes;
+Model* paredes;
 Model* piso;
-Model *plano;
+Model* plano;
 Model* letras;
 Model* masetasinv;
 Model* mesassillascafe;
@@ -112,7 +112,7 @@ AnimatedModel* conejo;
 AnimatedModel* serpiente;
 
 // Cubemap (fondo)
-CubeMap *mainCubeMap;
+CubeMap* mainCubeMap;
 
 // Luces
 std::vector<Light> gLights;
@@ -123,25 +123,25 @@ Material materialPiso;
 Material materialMueblesSala;
 
 // --- Funciones de ayuda para luces 
-void SetLightUniformInt(Shader *shader, const char* propertyName, size_t lightIndex, int value) {
+void SetLightUniformInt(Shader* shader, const char* propertyName, size_t lightIndex, int value) {
 	std::ostringstream ss;
 	ss << "allLights[" << lightIndex << "]." << propertyName;
 	std::string uniformName = ss.str();
 	shader->setInt(uniformName.c_str(), value);
 }
-void SetLightUniformFloat(Shader *shader, const char* propertyName, size_t lightIndex, float value) {
+void SetLightUniformFloat(Shader* shader, const char* propertyName, size_t lightIndex, float value) {
 	std::ostringstream ss;
 	ss << "allLights[" << lightIndex << "]." << propertyName;
 	std::string uniformName = ss.str();
 	shader->setFloat(uniformName.c_str(), value);
 }
-void SetLightUniformVec4(Shader *shader, const char* propertyName, size_t lightIndex, glm::vec4 value) {
+void SetLightUniformVec4(Shader* shader, const char* propertyName, size_t lightIndex, glm::vec4 value) {
 	std::ostringstream ss;
 	ss << "allLights[" << lightIndex << "]." << propertyName;
 	std::string uniformName = ss.str();
 	shader->setVec4(uniformName.c_str(), value);
 }
-void SetLightUniformVec3(Shader *shader, const char* propertyName, size_t lightIndex, glm::vec3 value) {
+void SetLightUniformVec3(Shader* shader, const char* propertyName, size_t lightIndex, glm::vec3 value) {
 	std::ostringstream ss;
 	ss << "allLights[" << lightIndex << "]." << propertyName;
 	std::string uniformName = ss.str();
@@ -198,7 +198,7 @@ bool Start() {
 
 	// Activación de buffer de profundidad
 	glEnable(GL_DEPTH_TEST);
-	
+
 
 	// Compilación de shaders 
 	staticLightShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
@@ -209,7 +209,7 @@ bool Start() {
 
 
 	// Carga de modelos galería
-	paredes = new Model("models/Paredes.fbx"); 
+	paredes = new Model("models/Paredes.fbx");
 	piso = new Model("models/Piso.fbx");
 	plano = new Model("models/Plano.fbx");
 	letras = new Model("models/Letras.fbx");
@@ -225,7 +225,7 @@ bool Start() {
 	pinturas = new Model("models/Pinturas.fbx");
 	pinturas2 = new Model("models/Pinturas2.fbx");
 	esculturas = new Model("models/Esculturas.fbx");
-	lampstecho = new Model("models/LampsTecho.fbx"); 
+	lampstecho = new Model("models/LampsTecho.fbx");
 	terrario = new Model("models/Terrario.fbx");
 	puertaprind = new Model("models/PuertaPrinD.fbx");
 	puertaprini = new Model("models/PuertaPrinI.fbx");
@@ -251,9 +251,9 @@ bool Start() {
 	// Configuración de luces 
 
 	Light light_sol;
-	light_sol.Position = glm::vec3(0.0f, 50.0f, 0.0f);   // Posición MUY ALTA, en el cielo
+	light_sol.Position = glm::vec3(0.0f, 60.0f, 40.0f);   // Posición MUY ALTA, en el cielo
 	light_sol.Direction = glm::vec3(0.0f, -1.0f, 0.0f);  // Apuntando directo hacia abajo
-	light_sol.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // Un color cálido, ligeramente amarillo
+	light_sol.Color = glm::vec4(1.0f, 1.0f, 0.92f, 1.0f); // Un color cálido, ligeramente amarillo
 	light_sol.Power = glm::vec4(1.2f, 1.2f, 1.2f, 1.0f); // Un poco más de potencia que los focos
 	light_sol.alphaIndex = 32;                           // Brillo especular
 	light_sol.distance = 1.0f;                           // Mantenemos la misma atenuación
@@ -265,7 +265,7 @@ bool Start() {
 	light01.Direction = glm::vec3(0.0f, -1.0f, 0.0f); // Dirección (apuntando hacia abajo)
 	light01.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f); // Color (más brillante)
 	light01.Power = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f); // Potencia
-	light01.alphaIndex = 32;                          // Índice especular
+	light01.alphaIndex = 16;                          // Índice especular
 	light01.distance = 2.0f;                         // <-- ARREGLADO
 	gLights.push_back(light01);
 
@@ -274,8 +274,8 @@ bool Start() {
 	light02.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
 	light02.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
 	light02.Power = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-	light02.alphaIndex = 32;
-	light02.distance = 2.0f;                       
+	light02.alphaIndex = 16;
+	light02.distance = 2.0f;
 	gLights.push_back(light02);
 
 	Light light03;
@@ -283,7 +283,7 @@ bool Start() {
 	light03.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
 	light03.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
 	light03.Power = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-	light03.alphaIndex = 32;
+	light03.alphaIndex = 16;
 	light03.distance = 2.0f;
 	gLights.push_back(light03);
 
@@ -292,28 +292,29 @@ bool Start() {
 	light04.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
 	light04.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
 	light04.Power = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-	light04.alphaIndex = 32;
+	light04.alphaIndex = 16;
 	light04.distance = 2.0f;
 	gLights.push_back(light04);
 
-	//_________Luces Cafe
+	//------Luz inv
 	Light light05;
-	light05.Position = glm::vec3(-18.0f, 4.4f, -5.0f);
+	light05.Position = glm::vec3(0.0f, 4.4f, -20.0f);
 	light05.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
 	light05.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
 	light05.Power = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-	light05.alphaIndex = 32;
+	light05.alphaIndex = 16;
 	light05.distance = 2.0f;
 	gLights.push_back(light05);
-
+//_________Luces Cafe
 	Light light06;
-	light06.Position = glm::vec3(-18.0f, 4.4f, -10.0f);
+	light06.Position = glm::vec3(-15.0f, 4.4f, -7.5f);
 	light06.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
 	light06.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
 	light06.Power = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-	light06.alphaIndex = 32;
+	light06.alphaIndex = 16;
 	light06.distance = 2.0f;
 	gLights.push_back(light06);
+
 
 	//---MATERIAL Principal
 	materialPrincipal.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
@@ -402,7 +403,7 @@ bool Update() {
 
 	butterfly->UpdateAnimation(deltaTime);
 	colibri->UpdateAnimation(deltaTime);
-	conejo->UpdateAnimation(deltaTime); 
+	conejo->UpdateAnimation(deltaTime);
 	//iguana->UpdateAnimation(deltaTime);
 	serpiente->UpdateAnimation(deltaTime);
 
@@ -451,6 +452,11 @@ bool Update() {
 
 		// Modelo Paredes
 		{
+			staticLightShader->setVec4("MaterialAmbientColor", materialMueblesSala.ambient);
+			staticLightShader->setVec4("MaterialDiffuseColor", materialMueblesSala.diffuse);
+			staticLightShader->setVec4("MaterialSpecularColor", materialMueblesSala.specular);
+			staticLightShader->setFloat("transparency", materialMueblesSala.transparency);
+
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
@@ -460,6 +466,11 @@ bool Update() {
 			paredes->Draw(*staticLightShader); //¡Dibujamos la galería!
 
 		}
+		staticLightShader->setVec4("MaterialAmbientColor", materialPrincipal.ambient);
+		staticLightShader->setVec4("MaterialDiffuseColor", materialPrincipal.diffuse);
+		staticLightShader->setVec4("MaterialSpecularColor", materialPrincipal.specular);
+		staticLightShader->setFloat("transparency", materialPrincipal.transparency);
+
 		// Modelo Puerta Derecha
 		{
 			glm::mat4 model = glm::mat4(1.0f);
@@ -472,7 +483,7 @@ bool Update() {
 
 			staticLightShader->setMat4("model", model);
 			puertaprind->Draw(*staticLightShader);
-		} 
+		}
 
 		// Modelo Puerta Izquierda
 		{
@@ -527,7 +538,7 @@ bool Update() {
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
-			piso->Draw(*staticLightShader); 
+			piso->Draw(*staticLightShader);
 		}
 
 		staticLightShader->setVec4("MaterialAmbientColor", materialPrincipal.ambient);
@@ -543,7 +554,7 @@ bool Update() {
 			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
 			staticLightShader->setMat4("model", model);
 
-			plano->Draw(*staticLightShader); 
+			plano->Draw(*staticLightShader);
 		}
 		//Modelo Letras
 		{
@@ -621,7 +632,7 @@ bool Update() {
 			staticLightShader->setVec4("MaterialDiffuseColor", materialMueblesSala.diffuse);
 			staticLightShader->setVec4("MaterialSpecularColor", materialMueblesSala.specular);
 			staticLightShader->setFloat("transparency", materialMueblesSala.transparency);
-			
+
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
@@ -706,7 +717,7 @@ bool Update() {
 			terrario->Draw(*staticLightShader);
 		}
 
-		
+
 		//Modelos Animados
 		{
 			// ¡Usamos el shader de animación!
@@ -845,7 +856,7 @@ bool Update() {
 // Procesamos entradas del teclado
 void processInput(GLFWwindow* window)
 {
-	
+
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 		camera.MovementSpeed = VELOCIDAD_SPRINT;
 	else
@@ -853,7 +864,7 @@ void processInput(GLFWwindow* window)
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-	
+
 	// ========== PUERTAS PRINCIPALES (H = cerrar, J = abrir) ==========
 	static bool teclaJ_presionada = false;
 	static bool teclaH_presionada = false;
