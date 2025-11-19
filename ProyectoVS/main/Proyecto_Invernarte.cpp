@@ -44,8 +44,8 @@ void processInput(GLFWwindow* window);
 GLFWwindow* window;
 
 // Tamaño de la ventana
-const unsigned int SCR_WIDTH = 1920;
-const unsigned int SCR_HEIGHT = 1080;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 900;
 
 // Definición de cámara (posición inicial en XYZ)
 Camera camera(glm::vec3(0.0f, 1.72f, 30.0f));
@@ -82,7 +82,6 @@ const float VELOCIDAD_SPRINT = 20.0f;
 Shader* staticLightShader;
 Shader* cubemapShader;
 Shader* butterflyShader;
-//Shader* dynamicShader;
 
 // Modelos
 Model* paredes;
@@ -203,7 +202,6 @@ bool Start() {
 	// Compilación de shaders 
 	staticLightShader = new Shader("shaders/11_PhongShaderMultLights.vs", "shaders/11_PhongShaderMultLights.fs");
 	cubemapShader = new Shader("shaders/10_vertex_cubemap.vs", "shaders/10_fragment_cubemap.fs");
-	//dynamicShader = new Shader("shaders/10_skinning-IT.vs");
 	butterflyShader = new Shader("shaders/17_mariposa.vs", "shaders/17_mariposa.fs");
 	butterflyShader->setBonesIDs(MAX_RIGGING_BONES);
 
@@ -232,7 +230,6 @@ bool Start() {
 	butterfly = new AnimatedModel("models/Mariposa.fbx");
 	colibri = new AnimatedModel("models/Colibri.fbx");
 	conejo = new AnimatedModel("models/Conejo.fbx");
-	//iguana = new AnimatedModel("models/Iguana.fbx");
 	serpiente = new AnimatedModel("models/Serpiente.fbx");
 
 	// Carga del Cubemap
@@ -249,24 +246,24 @@ bool Start() {
 	mainCubeMap->loadCubemap(faces);
 
 	// Configuración de luces 
-
+	//-------Luz Sol
 	Light light_sol;
-	light_sol.Position = glm::vec3(0.0f, 60.0f, 40.0f);   // Posición MUY ALTA, en el cielo
-	light_sol.Direction = glm::vec3(0.0f, -1.0f, 0.0f);  // Apuntando directo hacia abajo
-	light_sol.Color = glm::vec4(1.0f, 1.0f, 0.92f, 1.0f); // Un color cálido, ligeramente amarillo
-	light_sol.Power = glm::vec4(1.2f, 1.2f, 1.2f, 1.0f); // Un poco más de potencia que los focos
-	light_sol.alphaIndex = 32;                           // Brillo especular
-	light_sol.distance = 1.0f;                           // Mantenemos la misma atenuación
+	light_sol.Position = glm::vec3(0.0f, 60.0f, 40.0f);   
+	light_sol.Direction = glm::vec3(0.0f, -1.0f, 0.0f);  
+	light_sol.Color = glm::vec4(1.0f, 1.0f, 0.92f, 1.0f); 
+	light_sol.Power = glm::vec4(1.2f, 1.2f, 1.2f, 1.0f); 
+	light_sol.alphaIndex = 32;                           
+	light_sol.distance = 1.0f;                           
 	gLights.push_back(light_sol);
 
 	//_______LUCES SALA
 	Light light01;				//(X, Y, Z)
-	light01.Position = glm::vec3(5.0f, 4.4f, 5.0f);   // Posición
-	light01.Direction = glm::vec3(0.0f, -1.0f, 0.0f); // Dirección (apuntando hacia abajo)
-	light01.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f); // Color (más brillante)
-	light01.Power = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f); // Potencia
-	light01.alphaIndex = 16;                          // Índice especular
-	light01.distance = 2.0f;                         // <-- ARREGLADO
+	light01.Position = glm::vec3(5.0f, 4.4f, 5.0f);		// Posición
+	light01.Direction = glm::vec3(0.0f, -1.0f, 0.0f);	// Dirección (apuntando hacia abajo)
+	light01.Color = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);	// Color (más brillante)
+	light01.Power = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);	// Potencia
+	light01.alphaIndex = 16;							// Índice especular
+	light01.distance = 2.0f;                         
 	gLights.push_back(light01);
 
 	Light light02;
@@ -305,7 +302,7 @@ bool Start() {
 	light05.alphaIndex = 16;
 	light05.distance = 2.0f;
 	gLights.push_back(light05);
-//_________Luces Cafe
+	//_________Luces Cafe
 	Light light06;
 	light06.Position = glm::vec3(-15.0f, 4.4f, -7.5f);
 	light06.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -324,15 +321,15 @@ bool Start() {
 
 	//---MATERIAL Piso
 	materialPiso.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
-	materialPiso.diffuse = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f); // Usa el color claro de tu madera
-	materialPiso.specular = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // ¡CERO BRILLO!
+	materialPiso.diffuse = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f); 
+	materialPiso.specular = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); 
 	materialPiso.transparency = 1.0f;
 
 
 	//---MATERIAL Muebles de la sala
 	materialMueblesSala.ambient = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
-	materialMueblesSala.diffuse = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f); // Un gris medio para la tela
-	materialMueblesSala.specular = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // ¡CERO BRILLO!
+	materialMueblesSala.diffuse = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+	materialMueblesSala.specular = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); 
 	materialMueblesSala.transparency = 1.0f;
 
 	camera.MovementSpeed = VELOCIDAD_NORMAL;
@@ -404,7 +401,6 @@ bool Update() {
 	butterfly->UpdateAnimation(deltaTime);
 	colibri->UpdateAnimation(deltaTime);
 	conejo->UpdateAnimation(deltaTime);
-	//iguana->UpdateAnimation(deltaTime);
 	serpiente->UpdateAnimation(deltaTime);
 
 	// Limpiar buffers
@@ -444,7 +440,7 @@ bool Update() {
 
 		staticLightShader->setVec3("eye", camera.Position);
 
-		// Aplicamos propiedades materiales (Opcional, si el modelo no las tiene)
+		// Aplicamos propiedades materiales 
 		staticLightShader->setVec4("MaterialAmbientColor", materialPrincipal.ambient);
 		staticLightShader->setVec4("MaterialDiffuseColor", materialPrincipal.diffuse);
 		staticLightShader->setVec4("MaterialSpecularColor", materialPrincipal.specular);
@@ -458,12 +454,12 @@ bool Update() {
 			staticLightShader->setFloat("transparency", materialMueblesSala.transparency);
 
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));						// Traslación
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));	// Rotación
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));							// Escala
 			staticLightShader->setMat4("model", model);
 
-			paredes->Draw(*staticLightShader); //¡Dibujamos la galería!
+			paredes->Draw(*staticLightShader); //Dibujamos 
 
 		}
 		staticLightShader->setVec4("MaterialAmbientColor", materialPrincipal.ambient);
@@ -474,11 +470,10 @@ bool Update() {
 		// Modelo Puerta Derecha
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 19.85f)); // Posición base
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación base
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala base
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 19.85f));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 
-			// Ahora aplicamos el movimiento dinámico (solo en X)
 			model = glm::translate(model, glm::vec3(der, 0.0f, 0.0f));
 
 			staticLightShader->setMat4("model", model);
@@ -488,11 +483,10 @@ bool Update() {
 		// Modelo Puerta Izquierda
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 19.85f)); // Posición base
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación base
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala base
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 19.85f)); 
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	
 
-			// Ahora aplicamos el movimiento dinámico (solo en X)
 			model = glm::translate(model, glm::vec3(izq, 0.0f, 0.0f));
 
 			staticLightShader->setMat4("model", model);
@@ -501,29 +495,27 @@ bool Update() {
 		// Puerta Derecha 2
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(-20.0f, 0.0f, -1.28f)); // EN EL ORIGEN
+			model = glm::translate(model, glm::vec3(-20.0f, 0.0f, -1.28f)); 
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 			model = glm::scale(model, glm::vec3(1.25f, 1.0f, 1.0f));
 
-			// Movimiento dinámico
 			model = glm::translate(model, glm::vec3(der2, 0.0f, 0.0f));
 
 			staticLightShader->setMat4("model", model);
-			puertaprind->Draw(*staticLightShader); // ← ¡Reutilizamos el mismo modelo!
+			puertaprind->Draw(*staticLightShader); 
 		}
 
 		// Puerta Izquierda 2
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(-20.0f, 0.0f, -1.28f)); // EN EL ORIGEN
+			model = glm::translate(model, glm::vec3(-20.0f, 0.0f, -1.28f)); 
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 			model = glm::scale(model, glm::vec3(1.25f, 1.0f, 1.0f));
 
-			// Movimiento dinámico
 			model = glm::translate(model, glm::vec3(izq2, 0.0f, 0.0f));
 
 			staticLightShader->setMat4("model", model);
-			puertaprini->Draw(*staticLightShader); // ← ¡Reutilizamos el mismo modelo!
+			puertaprini->Draw(*staticLightShader); 
 		}
 		// Modelo Piso
 		{
@@ -533,9 +525,9 @@ bool Update() {
 			staticLightShader->setFloat("transparency", materialPiso.transparency);
 
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	
 			staticLightShader->setMat4("model", model);
 
 			piso->Draw(*staticLightShader);
@@ -549,9 +541,9 @@ bool Update() {
 		//Modelo Plano
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	
 			staticLightShader->setMat4("model", model);
 
 			plano->Draw(*staticLightShader);
@@ -559,9 +551,9 @@ bool Update() {
 		//Modelo Letras
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	
 			staticLightShader->setMat4("model", model);
 
 			letras->Draw(*staticLightShader);
@@ -569,9 +561,9 @@ bool Update() {
 		//Modelo MasetasInv
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));  
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	 
 			staticLightShader->setMat4("model", model);
 
 			masetasinv->Draw(*staticLightShader);
@@ -579,9 +571,9 @@ bool Update() {
 		//Modelo MesasSillasCafe
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));  
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 			staticLightShader->setMat4("model", model);
 
 			mesassillascafe->Draw(*staticLightShader);
@@ -589,9 +581,9 @@ bool Update() {
 		//Modelo Muebles Cafe
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	 
 			staticLightShader->setMat4("model", model);
 
 			mueblescafe->Draw(*staticLightShader);
@@ -599,9 +591,9 @@ bool Update() {
 		//Modelo Electrodomesticos
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));  
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	 
 			staticLightShader->setMat4("model", model);
 
 			electrodomesticos->Draw(*staticLightShader);
@@ -609,9 +601,9 @@ bool Update() {
 		//Modelo Adicionales de la cafe
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));  
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));  
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	
 			staticLightShader->setMat4("model", model);
 
 			adiccafe->Draw(*staticLightShader);
@@ -619,9 +611,9 @@ bool Update() {
 		//Modelo Consumibles Cafe(donas, vasos)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));  
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	 
 			staticLightShader->setMat4("model", model);
 
 			consumibles->Draw(*staticLightShader);
@@ -634,9 +626,9 @@ bool Update() {
 			staticLightShader->setFloat("transparency", materialMueblesSala.transparency);
 
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));  
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	 
 			staticLightShader->setMat4("model", model);
 
 			mueblessala->Draw(*staticLightShader);
@@ -649,9 +641,9 @@ bool Update() {
 			staticLightShader->setFloat("transparency", materialPrincipal.transparency);
 
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));  
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	 
 			staticLightShader->setMat4("model", model);
 
 			plantasaxo->Draw(*staticLightShader);
@@ -659,9 +651,9 @@ bool Update() {
 		//Modelo Plantas Invernadero
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));  
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	 
 			staticLightShader->setMat4("model", model);
 
 			plantasinv->Draw(*staticLightShader);
@@ -669,9 +661,9 @@ bool Update() {
 		//Modelo Pinturas
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));  
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	 
 			staticLightShader->setMat4("model", model);
 
 			pinturas->Draw(*staticLightShader);
@@ -679,9 +671,9 @@ bool Update() {
 		//Modelo Pinturas2
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));  
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	 
 			staticLightShader->setMat4("model", model);
 
 			pinturas2->Draw(*staticLightShader);
@@ -689,9 +681,9 @@ bool Update() {
 		//Modelo Esculturas
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	
 			staticLightShader->setMat4("model", model);
 
 			esculturas->Draw(*staticLightShader);
@@ -699,9 +691,9 @@ bool Update() {
 		//Modelo Lamps Techo
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	
 			staticLightShader->setMat4("model", model);
 
 			lampstecho->Draw(*staticLightShader);
@@ -709,9 +701,9 @@ bool Update() {
 		//Modelo Terrario
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Posición en el mundo
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotación
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// Escala
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));  
+			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	 
 			staticLightShader->setMat4("model", model);
 
 			terrario->Draw(*staticLightShader);
@@ -720,11 +712,10 @@ bool Update() {
 
 		//Modelos Animados
 		{
-			// ¡Usamos el shader de animación!
+			// Usamos el shader de animación
 			butterflyShader->use();
 			glDisable(GL_BLEND);
 
-			// --- ENVIAMOS UNIFORMES COMUNES ---
 			// Cámara
 			butterflyShader->setMat4("projection", projection);
 			butterflyShader->setMat4("view", view);
@@ -775,69 +766,48 @@ bool Update() {
 				// 5. Enviar Huesos (Bones)
 				butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, butterfly->gBones);
 
-				// 6. ¡Dibujar!
 				butterfly->Draw(*butterflyShader);
 			}
 
 			// --- DIBUJAR COLIBRI 
 			{
-				// 1. Construir la matriz de modelo (estática)
+				// 1. Construir la matriz de modelo
 				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::translate(model, glm::vec3(8.0f, 0.7f, -16.6f)); // <-- Posición estática
-				model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f)); // <-- AJUSTA LA ESCALA (quizás es diferente a la mariposa)
+				model = glm::translate(model, glm::vec3(8.0f, 0.7f, -16.6f)); 
+				model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));
 				butterflyShader->setMat4("model", model);
 
 				// 2. Enviar Huesos (Bones)
 				butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, colibri->gBones);
 
-				// 3. ¡Dibujar!
 				colibri->Draw(*butterflyShader);
 			}
 			// --- DIBUJAR Conejo
 			{
-				// 1. Construir la matriz de modelo (estática)
+				// 1. Construir la matriz de modelo
 				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::translate(model, glm::vec3(-3.5f, 0.25f, -7.0f)); // <-- Posición estática
-				model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // <-- AJUSTA LA ESCALA (quizás es diferente a la mariposa)
+				model = glm::translate(model, glm::vec3(-3.5f, 0.25f, -7.0f)); 
+				model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); 
 				model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 				butterflyShader->setMat4("model", model);
 
 				// 2. Enviar Huesos (Bones)
 				butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, conejo->gBones);
 
-				// 3. ¡Dibujar!
 				conejo->Draw(*butterflyShader);
 			}
-			/*
-			// --- AÑADIDO: DIBUJAR Jaguar (Estático por ahora) ---
-			{
-				// 1. Construir la matriz de modelo (estática)
-				// Usamos las variables globales que ya tenías
-				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f)); // <-- Posición estática
-				model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f)); // <-- AJUSTA LA ESCALA (quizás es diferente a la mariposa)
-				model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-				butterflyShader->setMat4("model", model);
-
-				// 2. Enviar Huesos (Bones)
-				butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, iguana->gBones);
-
-				// 3. ¡Dibujar!
-				iguana->Draw(*butterflyShader);
-			}*/
 			// --- DIBUJAR Serpiente
 			{
 				// 1. Construir la matriz de modelo 
 				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::translate(model, glm::vec3(2.5f, 0.2f, -5.0f)); // <-- Posición estática
-				model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // <-- AJUSTA LA ESCALA (quizás es diferente a la mariposa)
+				model = glm::translate(model, glm::vec3(2.5f, 0.2f, -5.0f)); 
+				model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f));
 				model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 				butterflyShader->setMat4("model", model);
 
 				// 2. Enviar Huesos (Bones)
 				butterflyShader->setMat4("gBones", MAX_RIGGING_BONES, serpiente->gBones);
 
-				// 3. ¡Dibujar!
 				serpiente->Draw(*butterflyShader);
 			}
 		}
@@ -916,7 +886,7 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_RELEASE) {
 		teclaY_presionada = false;
 	}
-
+	//Movimiento
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera.ProcessKeyboard(FORWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
